@@ -1,4 +1,5 @@
 package com.oocourse.specs1;
+
 import com.oocourse.specs1.models.Path;
 
 import java.util.ArrayList;
@@ -12,7 +13,7 @@ public class MyPath implements Path {
 
     public MyPath(int[] nodeList) {
         list = new ArrayList<>();
-        for(int i : nodeList){
+        for (int i : nodeList) {
             list.add(i);
         }
         //list = new ArrayList<Integer>(Arrays.asList(nodeList));
@@ -31,7 +32,7 @@ public class MyPath implements Path {
       @*/
     public /*@pure@*/ int getNode(int index) {
         if (index < 0 || index >= list.size()) {
-            throw new  IndexOutOfBoundsException();
+            throw new IndexOutOfBoundsException();
         }
         return list.get(index);
     }
@@ -82,7 +83,7 @@ public class MyPath implements Path {
         return list.size() >= 2;
     }
 
-    public Iterator<Integer> iterator(){
+    public Iterator<Integer> iterator() {
         return list.iterator();
     }
 
@@ -90,8 +91,8 @@ public class MyPath implements Path {
         if (o == null) {
             throw new NullPointerException();
         }
-        int len = Integer.min(o.size(),list.size());
-        for(int i = 0; i < len; ++i) {
+        int len = Integer.min(o.size(), list.size());
+        for (int i = 0; i < len; ++i) {
             if (list.get(i) != o.getNode(i)) {
                 return list.get(i) - o.getNode(i);
             }
