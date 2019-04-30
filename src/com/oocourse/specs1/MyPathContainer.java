@@ -10,19 +10,21 @@ import java.util.*;
 public class MyPathContainer implements PathContainer {
 
     private static int id = 1;
-    private TreeMap<Path, Integer> pList;
-    private TreeMap<Integer, Path> pidList;
+    private TreeMap<Path, Integer> plist;
+    private Path[] pidList;
+    private TreeMap<Integer, Integer> nodes;
 
     public MyPathContainer() {
-        pList = new TreeMap<>();
-        pidList = new TreeMap<>();
+        plist = new TreeMap<>();
+        pidList = new Path[3005];
+        nodes = new TreeMap<>();
     }
     //@ public instance model non_null Path[] pList;
     //@ public instance model non_null int[] pidList;
 
     //@ ensures \result == pList.length;
     public /*@pure@*/int size() {
-        return pList.size();
+        return plist.size();
     }
 
     /*@ requires path != null;
@@ -34,19 +36,17 @@ public class MyPathContainer implements PathContainer {
         if (path == null) {
             throw new NullPointerException();
         }
-        for (Path p : pList.keySet()) {
-            if (p.equals(path)) {
-                return true;
-            }
-        }
-        return false;
+        return plist.containsKey(path);
     }
 
     /*@ ensures \result == (\exists int i; 0 <= i && i < pidList.length;
       @                      pidList[i] == pathId);
       @*/
     public /*@pure@*/ boolean containsPathId(int pathId) {
-        return pidList.keySet().contains(pathId);
+        if (pathId <= 0 || pathId > 3000) {
+            return false;
+        }
+        return pidList[pathId] != null;
     }
 
     /*@ public normal_behavior
@@ -63,7 +63,7 @@ public class MyPathContainer implements PathContainer {
         if (!containsPathId(pathId)) {
             throw new PathIdNotFoundException(pathId);
         }
-        return pidList.get(pathId);
+        return pidList[pathId];
     }
 
     /*@ public normal_behavior
@@ -80,7 +80,7 @@ public class MyPathContainer implements PathContainer {
         if (path == null || !path.isValid() || !containsPath(path)) {
             throw new PathNotFoundException(path);
         }
-        return pList.get(path);
+        return plist.get(path);
     }
 
     /*@ normal_behavior
@@ -105,14 +105,18 @@ public class MyPathContainer implements PathContainer {
             return 0;
         }
         if (containsPath(path)) {
-            try {
-                return getPathId(path);
-            } catch (PathNotFoundException e) {
-                return 0;
-            }
+            return plist.get(path);
         } else {
-            pList.put(path, id);
-            pidList.put(id, path);
+            plist.put(path, id);
+            pidList[id] = path;
+            for (int i : path) {
+                if (nodes.containsKey(i)) {
+                    nodes.put(i,nodes.get(i)+1);
+                }
+                else {
+                    nodes.put(i,1);
+                }
+            }
             return id++;
         }
     }
@@ -135,9 +139,16 @@ public class MyPathContainer implements PathContainer {
         if (path == null || !path.isValid() || !containsPath(path)) {
             throw new PathNotFoundException(path);
         }
-        int ret = getPathId(path);
-        pList.remove(path);
-        pidList.remove((Integer) ret);
+        int ret = plist.get(path);
+        plist.remove(path);
+        pidList[ret] = null;
+        for (int i : path) {
+            int tmp = nodes.get(i);
+            nodes.put(i,tmp-1);
+            if (tmp == 1) {
+                nodes.remove(i);
+            }
+        }
         return ret;
     }
 
@@ -156,9 +167,16 @@ public class MyPathContainer implements PathContainer {
         if (!containsPathId(pathId)) {
             throw new PathIdNotFoundException(pathId);
         }
-        Path p = getPathById(pathId);
-        pidList.remove((Integer) pathId);
-        pList.remove(p);
+        Path path = pidList[pathId];
+        pidList[pathId] = null;
+        plist.remove(path);
+        for (int i : path) {
+            int tmp = nodes.get(i);
+            nodes.put(i,tmp-1);
+            if (tmp == 1) {
+                nodes.remove(i);
+            }
+        }
     }
 
     /*@ ensures \result == (\num_of int[] nlist;
@@ -167,12 +185,6 @@ public class MyPathContainer implements PathContainer {
            (\forall int m, n; 0 <= m && m < n && n < nlist.length; nlist[m] != nlist[n]));
       @*/
     public /*@pure@*/int getDistinctNodeCount() { //在容器全局范围内查找不同的节点数
-        Set<Integer> s = new HashSet<>();
-        for (Path p : pList.keySet()) {
-            for (int j = 0; j < p.size(); ++j) {
-                s.add(p.getNode(j));
-            }
-        }
-        return s.size();
+        return nodes.size();
     }
 }

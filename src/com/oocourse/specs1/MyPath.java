@@ -2,20 +2,19 @@ package com.oocourse.specs1;
 
 import com.oocourse.specs1.models.Path;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Iterator;
+import java.util.*;
 
 public class MyPath implements Path {
 
     private ArrayList<Integer> list;
+    private TreeSet<Integer> s;
 
     public MyPath(int[] nodeList) {
         list = new ArrayList<>();
         for (int i : nodeList) {
             list.add(i);
         }
+        s = new TreeSet<>(list);
         //list = new ArrayList<Integer>(Arrays.asList(nodeList));
     }
     // Iterable<Integer>和Comparable<Path>接口的规格请参阅JDK
@@ -39,14 +38,13 @@ public class MyPath implements Path {
 
     //@ ensures \result == (\exists int i; 0 <= i && i < nodes.length; nodes[i] == node);
     public /*@pure@*/ boolean containsNode(int node) {
-        return list.contains(node);
+        return s.contains(node);
     }
 
     /*@ ensures \result == (\num_of int i, j; 0 <= i && i < j && j < nodes.length;
                              nodes[i] != nodes[j]);
       @*/
     public /*pure*/ int getDistinctNodeCount() {
-        HashSet<Integer> s = new HashSet<>(list);
         return s.size();
     }
 
