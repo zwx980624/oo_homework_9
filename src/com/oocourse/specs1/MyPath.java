@@ -69,9 +69,9 @@ public class MyPath implements Path {
         int len = Integer.min(o.size(), list.size());
         for (int i = 0; i < len; ++i) {
             if (list.get(i) != o.getNode(i)) {
-                return list.get(i) - o.getNode(i);
+                return Integer.compare(list.get(i),o.getNode(i));
             }
         }
-        return list.size() - o.size();
+        return Integer.compare(list.size(), o.size());
     }
 }
